@@ -13,12 +13,13 @@ function compile(input) {
       indent = spaces.length
       output += `${spaces}${name} (${args}) {\n`
     } else {
-      let spaces = line.match(/^s*/)[0].length
+      let spaces = line.match(/^\s*/)[0].length
       while(indent > spaces) {
-        let dedent = indents.shift();console.log({spaces,indent})
+        let dedent = indents.shift()
         indent -= dedent
         output += `${' '.repeat(dedent)}}\n`
       }
+      indent = spaces
       output += line + '\n'
     }
   }
