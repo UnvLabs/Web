@@ -11,7 +11,7 @@ function compile(input) {
       let [, spaces, name, args] = statement
       indents.unshift(spaces.length)
       indent = spaces.length
-      output += `${spaces}${name} (${args}) {\n`
+      output += `${spaces}${name} ${/function/.test(name) ? `${args}` : `(${args})`} {\n`
     } else {
       let spaces = line.match(/^\s*/)[0].length
       while(indent > spaces) {
