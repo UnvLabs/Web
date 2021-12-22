@@ -1,7 +1,7 @@
 function compile(input) {
   input = input.replace(
     /("(?:\\["\\]|[^"\\])*"|'(?:\\['\\]|[^'\\])*')|###[^]*?###|#.*/gm,
-    ([, string]) => (string ? string.replace('\n', '\\n') : '')
+    (_, string) => (string ? string.replace('\n', '\\n') : '')
   );
   let lines = input.split('\n');
   let comment = false;
