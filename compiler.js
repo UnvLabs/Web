@@ -22,7 +22,7 @@ function compile(input) {
         output += `${' '.repeat(indent)}}\n`;
         indents.shift();
       }
-      output += line + '\n';
+      output += line.replace(/^(\s*)var(\s)/, '$1let$2') + '\n';
     }
   }
   return output;
