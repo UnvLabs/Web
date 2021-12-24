@@ -14,7 +14,7 @@ function compile(input) {
     if (statement) {
       let [, spaces, name, args] = statement;
       indents.unshift(spaces.length);
-      output += `${spaces}${name} ${/function|try|class/.test(name) ? args : `(${args})`} {${/function/.test(name) ? '$locals = {}' : ''}\n`;
+      output += `${spaces}${name} ${/function|try|class/.test(name) ? args : `(${args})`} {${/function/.test(name) ? 'let $locals = {}' : ''}\n`;
     } else {
       let spaces = line.match(/^\s*/)[0].length;
       for (let indent of [...indents]) {
@@ -24,10 +24,10 @@ function compile(input) {
       }
       let variable = line.match(/^(\s*)([A-Za-z_]\w*)(\s*=.*)/)
       if(variable)
-        output += variable[1] + '$locals.' + variable[2] + variable[3] + '\n';
+        output += variable[1] + 'var ' + variable[2] + '=' + '$locals.' + variable[2] + variable[3] + '\n';
       else
         output += line + '\n';
     }
   }
-  return output;
+  return 'let $globals = {}, $locals = $globals;' + output;
 }
