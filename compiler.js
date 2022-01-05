@@ -20,8 +20,23 @@ function compile(input) {
     /("(?:\\["\\]|[^"\\])*"|'(?:\\['\\]|[^'\\])*')|###[^]*?###|#.*/gm,
     (_, string) => (string ? string.replace(/\n/g, "\\n") : "")
   );
-  let lines = input.split("\n");
-  let comment = false;
+  let lines = [];
+  let line = "";
+  let sqb = 0,
+    braces = 0,
+    parens = 0;
+  for (let char of input) {
+    if (char == "[") sqb++;
+    else if (char == "]") sqb--;
+    else if (char == "{") braces++;
+    else if (char == "}") braces--;
+    else if (char == "(") parens++;
+    else if (char == ")") parens--;
+    if (/[\n\r]/.test(char) && !sqb && !braces && !parens) {
+      lines.push(line);
+      line = "";
+    } else line += char;
+  }
   let indents = [];
   let output = "";
   for (let line of lines) {
@@ -31,15 +46,9 @@ function compile(input) {
     if (statement) {
       let [, spaces, name, args] = statement;
       indents.unshift(spaces.length);
-      if (/function|try|class/.test(name))
-        args = "(" + args + ")")
-      else if (//)
-      output +=
-        spaces +
-        name +
-        " " +
-        args +
-        " {\n";
+      if (/function|try|class/.test(name)) args = "(" + args + ")";
+
+      output += spaces + name + " " + args + " {\n";
     } else {
       let spaces = line.match(/^\s*/)[0].length;
       for (let indent of [...indents]) {
