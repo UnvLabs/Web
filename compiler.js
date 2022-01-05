@@ -42,13 +42,18 @@ function compile(input) {
   let output = "";
   for (let line of lines) {
     let statement = line.match(
-      /^(\s*)(if|else|switch|try|catch|(?:async\s+)?function\*?|class|do|while|for)\s(.+)/
+      /^(\s*)(if|else|switch|try|catch|(?:async\s+)?function\*?|class|do|while|for)\s([^]+)/
     );
     if (statement) {
       let [, spaces, name, args] = statement;
       indents.unshift(spaces.length);
+      if (/for|catch/.test(name)) {
+        args = args.replace(
+          /^\s*([\w\s,]+)\sin\s([^]*)/,
+          (_, vars, val) => "var [" + vars + "]" + " of $iter(" + val + ")"
+        );
+      }
       if (!/function|try|class/.test(name)) args = "(" + args + ")";
-
       output += spaces + name + " " + args + " {\n";
     } else {
       let spaces = line.match(/^\s*/)[0].length;
@@ -64,7 +69,7 @@ function compile(input) {
             (_, ws, names) => ws + "import {" + names + "} from"
           )
           .replace(
-            /^(\s*)((?:local\s|global\s)?)([\w\s,=]+)=(.*)/,
+            /^(\s*)((?:local\s|global\s)?)([\w\s,=]+)=([^]*)/,
             (_, ws, keyword, start, end) => {
               // choose the right keyword(let or var)
               let code = declare_var(
