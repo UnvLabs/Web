@@ -50,7 +50,7 @@ function compile(input) {
       if (/for|catch/.test(name)) {
         args = args.replace(
           /^\s*([\w\s,]+)\sin\s([^]*)/,
-          (_, vars, val) => "var [" + vars + "]" + " of $iter(" + val + ")"
+          (_, vars, val) => declare_var('', 'var', vars) + " of $iter(" + val + ")"
         );
       }
       if (!/function|try|class/.test(name)) args = "(" + args + ")";
