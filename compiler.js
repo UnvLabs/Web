@@ -1,3 +1,19 @@
+let declare_var = (ws, keyword, names) => {
+  let code = "";
+  let vars = names.split("=");
+
+  // declare variables
+  if (vars.length > 1)
+    code += ws + jskeyword + " " + vars.slice(1).join(",") + "\n";
+
+  // assign values
+  code +=
+    ws +
+    keyword +
+    " " +
+    vars.map((v) => (~v.indexOf(",") ? "[" + v + "]" : v)).join("=");
+  return code;
+};
 function compile(input) {
   input = input.replace(
     /("(?:\\["\\]|[^"\\])*"|'(?:\\['\\]|[^'\\])*')|###[^]*?###|#.*/gm,
@@ -14,9 +30,12 @@ function compile(input) {
     if (statement) {
       let [, spaces, name, args] = statement;
       indents.unshift(spaces.length);
-      output += `${spaces}${name} ${
-        /function|try|class/.test(name) ? args : `(${args})`
-      } {\n`;
+      output +=
+        spaces +
+        name +
+        " " +
+        (/function|try|class/.test(name) ? args : "(" + args + ")") +
+        " {\n";
     } else {
       let spaces = line.match(/^\s*/)[0].length;
       for (let indent of [...indents]) {
@@ -33,35 +52,23 @@ function compile(input) {
           .replace(
             /^(\s*)(local\s|global\s)?([\w\s,=]+)=(.*)/,
             (_, ws, keyword, start, end) => {
-              let code = "";
-              let vars = start.split("=");
               // choose the right keyword(let or var)
-              let jskeyword = keyword[0] == "l" ? "let" : "var";
- 
-              // declare variables
-              if (vars.length > 1)
-                code +=
-                  ws +
-                  jskeyword +
-                  " " +
-                  vars.slice(1).join(",") +
-                  "\n";
-
-              // assign values
-              code +=
-                ws +
-                jskeyword +
-                " " +
-                vars
-                  .map((v) => (~v.indexOf(",") ? "[" + v + "]" : v))
-                  .join("=");
+              let code = declare_var(
+                ws,
+                keyword[0] == "l" ? "let" : "var",
+                start
+              );
 
               // handle global variables
               if (keyword[0] == "g")
                 code +=
                   "=" +
                   vars
-                    .map((v) => (~v.indexOf(",") ? "[window." + v.split(",").join(",window.") + "]" : "window." + v))
+                    .map((v) =>
+                      ~v.indexOf(",")
+                        ? "[window." + v.split(",").join(",window.") + "]"
+                        : "window." + v
+                    )
                     .join("=");
 
               // unpack arrays
