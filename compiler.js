@@ -16,10 +16,11 @@ let declare_var = (ws, keyword, names) => {
 };
 
 function compile(input) {
-  input = input.replace(
-    /("(?:\\["\\]|[^"\\])*"|'(?:\\['\\]|[^'\\])*')|###[^]*?###|#.*/gm,
-    (_, string) => (string ? string.replace(/\n/g, "\\n") : "")
-  );
+  input =
+    input.replace(
+      /("(?:\\["\\]|[^"\\])*"|'(?:\\['\\]|[^'\\])*')|###[^]*?###|#.*/gm,
+      (_, string) => (string ? string.replace(/\n/g, "\\n") : "")
+    ) + "\n\n";
   let lines = [];
   let line = "";
   let sqb = 0,
@@ -46,7 +47,7 @@ function compile(input) {
     if (statement) {
       let [, spaces, name, args] = statement;
       indents.unshift(spaces.length);
-      if (/function|try|class/.test(name)) args = "(" + args + ")";
+      if (!/function|try|class/.test(name)) args = "(" + args + ")";
 
       output += spaces + name + " " + args + " {\n";
     } else {
@@ -92,5 +93,5 @@ function compile(input) {
           ) + "\n";
     }
   }
-  return output;
+  return output.trim();
 }
