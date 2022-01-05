@@ -14,6 +14,7 @@ let declare_var = (ws, keyword, names) => {
     vars.map((v) => (~v.indexOf(",") ? "[" + v + "]" : v)).join("=");
   return code;
 };
+
 function compile(input) {
   input = input.replace(
     /("(?:\\["\\]|[^"\\])*"|'(?:\\['\\]|[^'\\])*')|###[^]*?###|#.*/gm,
@@ -25,16 +26,19 @@ function compile(input) {
   let output = "";
   for (let line of lines) {
     let statement = line.match(
-      /^(\s*)(if|else|switch|try|catch|(?:async\s+)?function\*?|class|do|while|for)\s+(.+)/
+      /^(\s*)(if|else|switch|try|catch|(?:async\s+)?function\*?|class|do|while|for)\s(.+)/
     );
     if (statement) {
       let [, spaces, name, args] = statement;
       indents.unshift(spaces.length);
+      if (/function|try|class/.test(name))
+        args = "(" + args + ")")
+      else if (//)
       output +=
         spaces +
         name +
         " " +
-        (/function|try|class/.test(name) ? args : "(" + args + ")") +
+        args +
         " {\n";
     } else {
       let spaces = line.match(/^\s*/)[0].length;
