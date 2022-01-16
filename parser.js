@@ -9,6 +9,10 @@ const block_comment = createToken({
   name: "block_comment",
   pattern: /###[^]*?###/,
 });
+const block_name = createToken({
+  name: "block_name",
+  pattern: /if|else|switch|try|catch|class|do|while|for/,
+});
 const lparen = createToken({ name: "lparen", pattern: /\(/ });
 const rparen = createToken({ name: "rparen", pattern: /\)/ });
 const lcurly = createToken({ name: "lcurly", pattern: /{/ });
@@ -92,14 +96,30 @@ class UnvParser extends CstParser {
       });
     });
 
+    $.RULE("compound_stat", () => {
+      $.CONSUME(block_name);
+      $.CONSUME(whitespace);
+      $.SUBRULE($.expr_stat);
+    });
+
     $.RULE("stat", () => {
-      $.OR([{ ALT: () => $.SUBRULE($.expr_stat) }]);
+      $.OR([
+        { ALT: () => $.SUBRULE($.expr_stat) },
+        { ALT: () => $.SUBRULE($.compound_stat) },
+      ]);
+    });
+
+    $.RULE("stats", () => {
+      $.MANY_SEP({
+        SEP: newline,
+        DEF: () => {
+          $.SUBRULE($.stat);
+        },
+      });
     });
 
     $.RULE("program", () => {
-      $.MANY(() => {
-        $.SUBRULE($.stat);
-      });
+      $.SUBRULE($.stats);
     });
 
     $.RULE("paren_expr", () => {
